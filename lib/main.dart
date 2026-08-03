@@ -5,7 +5,7 @@ import 'package:flutter_admin_kit/core/router/app_router.dart';
 import 'package:flutter_admin_kit/core/theme/app_theme.dart';
 import 'package:flutter_admin_kit/core/theme/theme_cubit.dart';
 import 'package:flutter_admin_kit/injection/injection.dart';
-import 'features/authentication/presentation/bloc/auth_cubit.dart';
+import 'features/authentication/presentation/bloc/auth_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,10 +26,11 @@ class MyApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthCubit>(create: (context) => getIt<AuthCubit>()),
+        BlocProvider<AuthBloc>(create: (context) => getIt<AuthBloc>()),
         BlocProvider<ThemeCubit>(create: (context) => getIt<ThemeCubit>()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
+        buildWhen: (previous, current) => previous != current,
         builder: (context, themeMode) {
           return MaterialApp.router(
             title: 'AdminKit - Flutter Admin Dashboard',
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeMode,
+            themeAnimationDuration: Duration.zero,
             routerConfig: appRouter.router,
             builder: (context, child) => ResponsiveBreakpoints.builder(
               child: child!,

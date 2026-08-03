@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_admin_kit/core/services/local_storage_service.dart';
@@ -29,15 +31,30 @@ class ThemeCubit extends Cubit<ThemeMode> {
   /// Toggles between Light and Dark mode based on current context brightness.
   void toggleTheme(BuildContext context) {
     final currentBrightness = Theme.of(context).brightness;
-    final newMode = currentBrightness == Brightness.dark ? ThemeMode.light : ThemeMode.dark;
-    
-    emit(newMode);
-    _localStorageService.saveThemeMode(newMode.name);
+    final newMode = currentBrightness == Brightness.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
+
+    _applyThemeMode(newMode);
   }
 
   /// Directly set a specific [ThemeMode].
   void setThemeMode(ThemeMode mode) {
+    _applyThemeMode(mode);
+  }
+
+  void _applyThemeMode(ThemeMode mode) {
+    if (state == mode) return;
+
     emit(mode);
-    _localStorageService.saveThemeMode(mode.name);
+    unawaited(
+      _localStorageService.saveThemeMode(mode.name).catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        addError(error, stackTrace);
+        return false;
+      }),
+    );
   }
 }

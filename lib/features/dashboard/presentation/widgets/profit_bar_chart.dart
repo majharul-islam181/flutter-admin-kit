@@ -26,7 +26,9 @@ class ProfitBarChart extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(isDark ? 0.2 : 0.5),
+          color: theme.colorScheme.outline.withValues(
+            alpha: isDark ? 0.2 : 0.5,
+          ),
         ),
       ),
       child: Column(
@@ -42,12 +44,7 @@ class ProfitBarChart extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Row(
-                children: [
-                  Text('This Week', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
-                  Icon(Icons.keyboard_arrow_down, color: theme.colorScheme.onSurfaceVariant),
-                ],
-              ),
+              _DropdownHeader(),
             ],
           ),
           const SizedBox(height: 16),
@@ -55,97 +52,114 @@ class ProfitBarChart extends StatelessWidget {
             children: [
               _LegendItem(title: 'Sales', color: AppColors.tailAdminPrimary),
               const SizedBox(width: 16),
-              _LegendItem(title: 'Revenue', color: AppColors.tailAdminChartBlue),
+              _LegendItem(
+                title: 'Revenue',
+                color: AppColors.tailAdminChartBlue,
+              ),
             ],
           ),
           const SizedBox(height: 32),
           // Chart
           SizedBox(
             height: 300,
-            child: BarChart(
-              BarChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  horizontalInterval: 20,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: theme.colorScheme.outline.withOpacity(isDark ? 0.2 : 0.5),
-                      strokeWidth: 1,
-                    );
-                  },
-                ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 30,
-                      getTitlesWidget: (value, meta) {
-                        if (value.toInt() >= 0 && value.toInt() < data.length) {
-                          return SideTitleWidget(
-                            axisSide: meta.axisSide,
-                            space: 8,
-                            child: Text(
-                              data[value.toInt()].day,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
+            child: RepaintBoundary(
+              child: BarChart(
+                BarChartData(
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: 20,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: theme.colorScheme.outline.withValues(
+                          alpha: isDark ? 0.2 : 0.5,
+                        ),
+                        strokeWidth: 1,
+                      );
+                    },
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 30,
+                        getTitlesWidget: (value, meta) {
+                          if (value.toInt() >= 0 &&
+                              value.toInt() < data.length) {
+                            return SideTitleWidget(
+                              axisSide: meta.axisSide,
+                              space: 8,
+                              child: Text(
+                                data[value.toInt()].day,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
                               ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 20,
+                        reservedSize: 42,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            value.toInt().toString(),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
+                            textAlign: TextAlign.left,
                           );
-                        }
-                        return const SizedBox.shrink();
-                      },
+                        },
+                      ),
                     ),
                   ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 20,
-                      reservedSize: 42,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          value.toInt().toString(),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.left,
-                        );
-                      },
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: theme.colorScheme.outline.withValues(
+                          alpha: isDark ? 0.2 : 0.5,
+                        ),
+                      ),
+                      left: BorderSide.none,
+                      right: BorderSide.none,
+                      top: BorderSide.none,
                     ),
                   ),
+                  maxY: 100,
+                  barGroups: data.asMap().entries.map((e) {
+                    return BarChartGroupData(
+                      x: e.key,
+                      barRods: [
+                        BarChartRodData(
+                          toY: e.value.salesProfit,
+                          color: AppColors.tailAdminPrimary,
+                          width: 8,
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        BarChartRodData(
+                          toY: e.value.revenueProfit,
+                          color: AppColors.tailAdminChartBlue,
+                          width: 8,
+                          borderRadius: BorderRadius.zero,
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
-                borderData: FlBorderData(
-                  show: true,
-                  border: Border(
-                    bottom: BorderSide(color: theme.colorScheme.outline.withOpacity(isDark ? 0.2 : 0.5)),
-                    left: BorderSide.none,
-                    right: BorderSide.none,
-                    top: BorderSide.none,
-                  ),
-                ),
-                maxY: 100,
-                barGroups: data.asMap().entries.map((e) {
-                  return BarChartGroupData(
-                    x: e.key,
-                    barRods: [
-                      BarChartRodData(
-                        toY: e.value.salesProfit,
-                        color: AppColors.tailAdminPrimary,
-                        width: 8,
-                        borderRadius: BorderRadius.zero,
-                      ),
-                      BarChartRodData(
-                        toY: e.value.revenueProfit,
-                        color: AppColors.tailAdminChartBlue,
-                        width: 8,
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ],
-                  );
-                }).toList(),
+                swapAnimationDuration: Duration.zero,
               ),
             ),
           ),
@@ -168,14 +182,61 @@ class _LegendItem extends StatelessWidget {
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color,
-          ),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
         const SizedBox(width: 6),
-        Text(title, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
+        Text(
+          title,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 13,
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _DropdownHeader extends StatefulWidget {
+  const _DropdownHeader();
+
+  @override
+  State<_DropdownHeader> createState() => _DropdownHeaderState();
+}
+
+class _DropdownHeaderState extends State<_DropdownHeader> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: _isHovered
+              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          children: [
+            Text(
+              'This Week',
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            ),
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: _isHovered
+                  ? theme.colorScheme.onSurface
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

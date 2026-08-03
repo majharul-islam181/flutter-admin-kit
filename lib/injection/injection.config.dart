@@ -19,7 +19,7 @@ import '../core/network/dio_client.dart' as _i393;
 import '../core/router/app_router.dart' as _i877;
 import '../core/services/local_storage_service.dart' as _i1003;
 import '../core/theme/theme_cubit.dart' as _i596;
-import '../features/authentication/presentation/bloc/auth_cubit.dart' as _i970;
+import '../features/authentication/presentation/bloc/auth_bloc.dart' as _i191;
 import '../features/dashboard/data/repositories/dashboard_repository_impl.dart'
     as _i650;
 import '../features/dashboard/domain/repositories/dashboard_repository.dart'
@@ -50,8 +50,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i596.ThemeCubit>(
       () => _i596.ThemeCubit(gh<_i1003.LocalStorageService>()),
     );
-    gh.lazySingleton<_i970.AuthCubit>(
-      () => _i970.AuthCubit(gh<_i1003.LocalStorageService>()),
+    gh.lazySingleton<_i191.AuthBloc>(
+      () => _i191.AuthBloc(gh<_i1003.LocalStorageService>()),
     );
     gh.factory<_i356.DashboardBloc>(
       () => _i356.DashboardBloc(gh<_i602.DashboardRepository>()),
@@ -64,7 +64,7 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.lazySingleton<_i877.AppRouter>(
-      () => _i877.AppRouter(gh<_i970.AuthCubit>()),
+      () => _i877.AppRouter(gh<_i191.AuthBloc>()),
     );
     return this;
   }

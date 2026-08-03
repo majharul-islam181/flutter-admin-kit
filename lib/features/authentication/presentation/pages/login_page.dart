@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_admin_kit/core/widgets/app_button.dart';
 import 'package:flutter_admin_kit/core/widgets/app_card.dart';
 import 'package:flutter_admin_kit/core/widgets/app_text_field.dart';
-import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_bloc.dart';
+import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_event.dart';
 import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_state.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,7 +16,9 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController(text: 'admin@flutteradminkit.com');
+  final _emailController = TextEditingController(
+    text: 'admin@flutteradminkit.com',
+  );
   final _passwordController = TextEditingController(text: 'password123');
 
   @override
@@ -30,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: BlocListener<AuthCubit, AuthState>(
+      body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -47,7 +50,10 @@ class _LoginPageState extends State<LoginPage> {
             child: SizedBox(
               width: 420,
               child: AppCard(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 40,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -76,7 +82,9 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         'Welcome back! Please sign in to access your administrative dashboard.',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -92,7 +100,9 @@ class _LoginPageState extends State<LoginPage> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          if (!RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          ).hasMatch(value)) {
                             return 'Please enter a valid email address';
                           }
                           return null;
@@ -120,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                       const SizedBox(height: 28),
 
                       // Submit Button
-                      BlocBuilder<AuthCubit, AuthState>(
+                      BlocBuilder<AuthBloc, AuthState>(
                         builder: (context, state) {
                           final isLoading = state is AuthLoading;
                           return AppButton(
@@ -143,10 +153,12 @@ class _LoginPageState extends State<LoginPage> {
 
   void _handleLogin() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthCubit>().login(
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+      context.read<AuthBloc>().add(
+        AuthLoginRequested(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        ),
+      );
     }
   }
 }

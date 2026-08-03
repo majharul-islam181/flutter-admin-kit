@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_admin_kit/core/services/local_storage_service.dart';
-import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_bloc.dart';
+import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_event.dart';
 import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_state.dart';
 
 class FakeLocalStorageService implements LocalStorageService {
@@ -52,28 +53,35 @@ class FakeLocalStorageService implements LocalStorageService {
 
 void main() {
   late FakeLocalStorageService fakeStorage;
-  late AuthCubit authCubit;
+  late AuthBloc authBloc;
 
   setUp(() {
     fakeStorage = FakeLocalStorageService();
-    // Default constructor will call checkAuth() automatically
-    authCubit = AuthCubit(fakeStorage);
+    authBloc = AuthBloc(fakeStorage);
   });
 
-  tearDown(() {
-    authCubit.close();
+  tearDown(() async {
+    if (!authBloc.isClosed) {
+      await authBloc.close();
+    }
   });
 
-  test('initial state is AuthUnauthenticated when no token is saved', () {
-    expect(authCubit.state, equals(AuthUnauthenticated()));
+  test('resolves AuthUnauthenticated when no token is saved', () async {
+    await Future<void>.delayed(Duration.zero);
+
+    expect(authBloc.state, equals(AuthUnauthenticated()));
   });
 
-  test('initial state is AuthAuthenticated when a token is pre-saved', () {
+  test('resolves AuthAuthenticated when a token is pre-saved', () async {
+    await authBloc.close();
     fakeStorage.token = 'existing_token';
-    // Re-instantiate to trigger constructor checkAuth
-    final cubit = AuthCubit(fakeStorage);
-    expect(cubit.state, equals(const AuthAuthenticated('existing_token')));
-    cubit.close();
+    final bloc = AuthBloc(fakeStorage);
+
+    await Future<void>.delayed(Duration.zero);
+
+    expect(bloc.state, equals(const AuthAuthenticated('existing_token')));
+
+    await bloc.close();
   });
 
   test('login emits loading then authenticated on valid credentials', () async {
@@ -82,25 +90,38 @@ void main() {
       const AuthAuthenticated('mock_jwt_token_for_admin_dashboard'),
     ];
 
-    expectLater(authCubit.stream, emitsInOrder(expectedStates));
+    final expectation = expectLater(
+      authBloc.stream,
+      emitsInOrder(expectedStates),
+    );
 
-    await authCubit.login('admin@flutteradminkit.com', 'password123');
+    authBloc.add(
+      const AuthLoginRequested(
+        email: 'admin@flutteradminkit.com',
+        password: 'password123',
+      ),
+    );
+
+    await expectation;
     expect(fakeStorage.token, equals('mock_jwt_token_for_admin_dashboard'));
   });
 
   test('logout clears token and emits unauthenticated', () async {
+    await authBloc.close();
     fakeStorage.token = 'active_token';
-    final cubit = AuthCubit(fakeStorage);
+    final bloc = AuthBloc(fakeStorage);
+    await Future<void>.delayed(Duration.zero);
 
-    final expectedStates = [
-      AuthLoading(),
-      AuthUnauthenticated(),
-    ];
+    expect(bloc.state, equals(const AuthAuthenticated('active_token')));
 
-    expectLater(cubit.stream, emitsInOrder(expectedStates));
+    final expectedStates = [AuthLoading(), AuthUnauthenticated()];
 
-    await cubit.logout();
+    final expectation = expectLater(bloc.stream, emitsInOrder(expectedStates));
+
+    bloc.add(const AuthLogoutRequested());
+
+    await expectation;
     expect(fakeStorage.token, isNull);
-    cubit.close();
+    await bloc.close();
   });
 }

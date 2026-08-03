@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
-import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_bloc.dart';
 import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_state.dart';
 import 'package:flutter_admin_kit/features/authentication/presentation/pages/login_page.dart';
 import 'package:flutter_admin_kit/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -15,15 +15,15 @@ import 'package:flutter_admin_kit/core/widgets/admin_layout.dart';
 
 @lazySingleton
 class AppRouter {
-  final AuthCubit _authCubit;
+  final AuthBloc _authBloc;
   late final GoRouter router;
 
-  AppRouter(this._authCubit) {
+  AppRouter(this._authBloc) {
     router = GoRouter(
       initialLocation: '/dashboard',
-      refreshListenable: GoRouterRefreshStream(_authCubit.stream),
+      refreshListenable: GoRouterRefreshStream(_authBloc.stream),
       redirect: (context, state) {
-        final authState = _authCubit.state;
+        final authState = _authBloc.state;
         final isLoggingIn = state.uri.toString() == '/login';
 
         if (authState is AuthUnauthenticated || authState is AuthInitial) {

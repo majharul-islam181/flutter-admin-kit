@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_cubit.dart';
+import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_bloc.dart';
+import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_event.dart';
 import 'package:flutter_admin_kit/core/theme/theme_cubit.dart';
 import 'package:flutter_admin_kit/core/theme/app_colors.dart';
 
 class AdminLayout extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
-  const AdminLayout({
-    super.key,
-    required this.navigationShell,
-  });
+  const AdminLayout({super.key, required this.navigationShell});
 
   @override
   State<AdminLayout> createState() => _AdminLayoutState();
@@ -24,7 +22,8 @@ class _AdminLayoutState extends State<AdminLayout> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final isMobile = mediaQuery.size.width < 768;
-    final isTablet = mediaQuery.size.width >= 768 && mediaQuery.size.width < 1200;
+    final isTablet =
+        mediaQuery.size.width >= 768 && mediaQuery.size.width < 1200;
     final isDesktop = mediaQuery.size.width >= 1200;
 
     final theme = Theme.of(context);
@@ -55,7 +54,7 @@ class _AdminLayoutState extends State<AdminLayout> {
                 isCollapsed: _isSidebarCollapsed,
               ),
             ),
-          
+
           // Main content area
           Expanded(
             child: Column(
@@ -75,11 +74,13 @@ class _AdminLayoutState extends State<AdminLayout> {
                     }
                   },
                 ),
-                
+
                 // Nested view content
                 Expanded(
                   child: Container(
-                    color: theme.brightness == Brightness.light ? const Color(0xFFF1F5F9) : theme.scaffoldBackgroundColor,
+                    color: theme.brightness == Brightness.light
+                        ? const Color(0xFFF1F5F9)
+                        : theme.scaffoldBackgroundColor,
                     child: widget.navigationShell,
                   ),
                 ),
@@ -108,15 +109,39 @@ class _SidebarContent extends StatelessWidget {
     final activeIndex = navigationShell.currentIndex;
 
     final items = [
-      _NavigationItem('Dashboard', Icons.dashboard_outlined, Icons.dashboard, hasSubmenu: true),
-      _NavigationItem('Calendar', Icons.calendar_today_outlined, Icons.calendar_today),
+      _NavigationItem(
+        'Dashboard',
+        Icons.dashboard_outlined,
+        Icons.dashboard,
+        hasSubmenu: true,
+      ),
+      _NavigationItem(
+        'Calendar',
+        Icons.calendar_today_outlined,
+        Icons.calendar_today,
+      ),
       _NavigationItem('Profile', Icons.person_outline, Icons.person),
-      _NavigationItem('Task', Icons.task_outlined, Icons.task, hasSubmenu: true),
-      _NavigationItem('Forms', Icons.edit_note_outlined, Icons.edit_note, hasSubmenu: true),
+      _NavigationItem(
+        'Task',
+        Icons.task_outlined,
+        Icons.task,
+        hasSubmenu: true,
+      ),
+      _NavigationItem(
+        'Forms',
+        Icons.edit_note_outlined,
+        Icons.edit_note,
+        hasSubmenu: true,
+      ),
       _NavigationItem('Tables', Icons.table_chart_outlined, Icons.table_chart),
-      _NavigationItem('Pages', Icons.pages_outlined, Icons.pages, hasSubmenu: true),
+      _NavigationItem(
+        'Pages',
+        Icons.pages_outlined,
+        Icons.pages,
+        hasSubmenu: true,
+      ),
     ];
-    
+
     final supportItems = [
       _NavigationItem('Messages', Icons.mail_outline, Icons.mail, badge: '5'),
       _NavigationItem('Inbox', Icons.inbox_outlined, Icons.inbox),
@@ -133,7 +158,9 @@ class _SidebarContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             alignment: Alignment.centerLeft,
             child: Row(
-              mainAxisAlignment: isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
+              mainAxisAlignment: isCollapsed
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.start,
               children: [
                 Container(
                   padding: const EdgeInsets.all(4),
@@ -172,7 +199,11 @@ class _SidebarContent extends StatelessWidget {
                     padding: EdgeInsets.only(left: 8, bottom: 16),
                     child: Text(
                       'MENU',
-                      style: TextStyle(color: Color(0xFF8A99AF), fontSize: 12, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: Color(0xFF8A99AF),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ...items.asMap().entries.map((entry) {
@@ -181,9 +212,15 @@ class _SidebarContent extends StatelessWidget {
                   // Map the index to our actual routes if possible. Let's just use index 0 for Dashboard.
                   final actualBranchIndex = index < 6 ? index : 0;
                   final isSelected = activeIndex == actualBranchIndex;
-                  
+
                   if (item.label == 'Dashboard') {
-                     return _buildSubMenu(context, item, isSelected, actualBranchIndex, ['eCommerce', 'Analytics', 'Marketing', 'CRM']);
+                    return _buildSubMenu(
+                      context,
+                      item,
+                      isSelected,
+                      actualBranchIndex,
+                      ['eCommerce', 'Analytics', 'Marketing', 'CRM'],
+                    );
                   }
 
                   return _buildMenuItem(context, item, isSelected, () {
@@ -191,21 +228,31 @@ class _SidebarContent extends StatelessWidget {
                     if (onSelect != null) onSelect!();
                   });
                 }),
-                
+
                 const SizedBox(height: 24),
-                
+
                 if (!isCollapsed)
                   const Padding(
                     padding: EdgeInsets.only(left: 8, bottom: 16),
                     child: Text(
                       'SUPPORT',
-                      style: TextStyle(color: Color(0xFF8A99AF), fontSize: 12, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: Color(0xFF8A99AF),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  
-                 ...supportItems.map((item) {
-                   return _buildMenuItem(context, item, false, () {}, isPro: true);
-                 }),
+
+                ...supportItems.map((item) {
+                  return _buildMenuItem(
+                    context,
+                    item,
+                    false,
+                    () {},
+                    isPro: true,
+                  );
+                }),
               ],
             ),
           ),
@@ -213,36 +260,57 @@ class _SidebarContent extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildSubMenu(BuildContext context, _NavigationItem item, bool isSelected, int branchIndex, List<String> subItems) {
-    if (isCollapsed) return _buildMenuItem(context, item, isSelected, () {
+
+  Widget _buildSubMenu(
+    BuildContext context,
+    _NavigationItem item,
+    bool isSelected,
+    int branchIndex,
+    List<String> subItems,
+  ) {
+    if (isCollapsed) {
+      return _buildMenuItem(context, item, isSelected, () {
         navigationShell.goBranch(branchIndex);
         if (onSelect != null) onSelect!();
-    });
-    
+      });
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InkWell(
           onTap: () {
-             navigationShell.goBranch(branchIndex);
-             if (onSelect != null) onSelect!();
+            navigationShell.goBranch(branchIndex);
+            if (onSelect != null) onSelect!();
           },
           borderRadius: BorderRadius.circular(4),
           child: Container(
             height: 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF333A48) : Colors.transparent, // tailAdminSidebarHover
+              color: isSelected
+                  ? const Color(0xFF333A48)
+                  : Colors.transparent, // tailAdminSidebarHover
               borderRadius: BorderRadius.circular(4),
             ),
             child: Row(
               children: [
                 Icon(item.icon, color: Colors.white, size: 20),
                 const SizedBox(width: 12),
-                Text(item.label, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500)),
+                Text(
+                  item.label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const Spacer(),
-                const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 20),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ],
             ),
           ),
@@ -261,19 +329,30 @@ class _SidebarContent extends StatelessWidget {
                       Text(
                         subItem,
                         style: TextStyle(
-                          color: isSubSelected ? Colors.white : const Color(0xFF8A99AF),
+                          color: isSubSelected
+                              ? Colors.white
+                              : const Color(0xFF8A99AF),
                           fontSize: 15,
                         ),
                       ),
                       if (subItem != 'eCommerce') ...[
-                         const Spacer(),
-                         Container(
-                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                           decoration: BoxDecoration(color: AppColors.tailAdminPrimary, borderRadius: BorderRadius.circular(12)),
-                           child: const Text('Pro', style: TextStyle(color: Colors.white, fontSize: 10)),
-                         ),
-                         const SizedBox(width: 12),
-                      ]
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.tailAdminPrimary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'Pro',
+                            style: TextStyle(color: Colors.white, fontSize: 10),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
                     ],
                   ),
                 );
@@ -284,7 +363,13 @@ class _SidebarContent extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, _NavigationItem item, bool isSelected, VoidCallback onTap, {bool isPro = false}) {
+  Widget _buildMenuItem(
+    BuildContext context,
+    _NavigationItem item,
+    bool isSelected,
+    VoidCallback onTap, {
+    bool isPro = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: InkWell(
@@ -298,7 +383,9 @@ class _SidebarContent extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           child: Row(
-            mainAxisAlignment: isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
+            mainAxisAlignment: isCollapsed
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
             children: [
               Icon(
                 item.icon,
@@ -318,18 +405,40 @@ class _SidebarContent extends StatelessWidget {
                 const Spacer(),
                 if (item.badge != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(color: AppColors.tailAdminPrimary, borderRadius: BorderRadius.circular(12)),
-                    child: Text(item.badge!, style: const TextStyle(color: Colors.white, fontSize: 10)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.tailAdminPrimary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      item.badge!,
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
+                    ),
                   ),
                 if (isPro)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(color: AppColors.tailAdminPrimary, borderRadius: BorderRadius.circular(12)),
-                    child: const Text('Pro', style: TextStyle(color: Colors.white, fontSize: 10)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.tailAdminPrimary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Pro',
+                      style: TextStyle(color: Colors.white, fontSize: 10),
+                    ),
                   ),
                 if (item.hasSubmenu)
-                   const Icon(Icons.keyboard_arrow_right, color: Color(0xFF8A99AF), size: 20),
+                  const Icon(
+                    Icons.keyboard_arrow_right,
+                    color: Color(0xFF8A99AF),
+                    size: 20,
+                  ),
               ],
             ],
           ),
@@ -362,7 +471,7 @@ class _Navbar extends StatelessWidget {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             offset: const Offset(0, 1),
             blurRadius: 4,
           ),
@@ -382,13 +491,17 @@ class _Navbar extends StatelessWidget {
             onPressed: onToggleSidebar,
           ),
           const SizedBox(width: 16),
-          
+
           // Search bar
           if (!isMobile)
             Expanded(
               child: Row(
                 children: [
-                  Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant, size: 20),
+                  Icon(
+                    Icons.search,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   const Text(
                     'Type to search...',
@@ -398,64 +511,80 @@ class _Navbar extends StatelessWidget {
               ),
             ),
           if (isMobile) const Spacer(),
-          
+
           // Actions
           // Theme Toggle Switch
           Container(
-             width: 50,
-             height: 26,
-             decoration: BoxDecoration(
-               color: const Color(0xFFE2E8F0),
-               borderRadius: BorderRadius.circular(20),
-             ),
-             child: Stack(
-               children: [
-                 Align(
-                   alignment: theme.brightness == Brightness.light ? Alignment.centerLeft : Alignment.centerRight,
-                   child: GestureDetector(
-                     onTap: () => context.read<ThemeCubit>().toggleTheme(context),
-                     child: Container(
-                       width: 22,
-                       height: 22,
-                       margin: const EdgeInsets.all(2),
-                       decoration: const BoxDecoration(
-                         color: Colors.white,
-                         shape: BoxShape.circle,
-                         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 2)],
-                       ),
-                       child: Icon(
-                         theme.brightness == Brightness.light ? Icons.light_mode : Icons.dark_mode,
-                         size: 14,
-                         color: theme.colorScheme.onSurface,
-                       ),
-                     ),
-                   ),
-                 ),
-               ],
-             ),
+            width: 50,
+            height: 26,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE2E8F0),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Stack(
+              children: [
+                Align(
+                  alignment: theme.brightness == Brightness.light
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () =>
+                        context.read<ThemeCubit>().toggleTheme(context),
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      margin: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(color: Colors.black12, blurRadius: 2),
+                        ],
+                      ),
+                      child: Icon(
+                        theme.brightness == Brightness.light
+                            ? Icons.light_mode
+                            : Icons.dark_mode,
+                        size: 14,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          
+
           const SizedBox(width: 16),
           // Notification Bell
           Stack(
             children: [
-               Container(
-                 padding: const EdgeInsets.all(8),
-                 decoration: BoxDecoration(
-                   shape: BoxShape.circle,
-                   color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-                 ),
-                 child: Icon(Icons.notifications_none_outlined, size: 20, color: theme.colorScheme.onSurfaceVariant),
-               ),
-               Positioned(
-                 top: 6,
-                 right: 8,
-                 child: Container(
-                   width: 6,
-                   height: 6,
-                   decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                 ),
-               )
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
+                ),
+                child: Icon(
+                  Icons.notifications_none_outlined,
+                  size: 20,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Positioned(
+                top: 6,
+                right: 8,
+                child: Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(width: 12),
@@ -464,12 +593,18 @@ class _Navbar extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
             ),
-            child: Icon(Icons.chat_bubble_outline, size: 20, color: theme.colorScheme.onSurfaceVariant),
+            child: Icon(
+              Icons.chat_bubble_outline,
+              size: 20,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(width: 24),
-          
+
           // Profile
           Row(
             children: [
@@ -478,15 +613,25 @@ class _Navbar extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Thomas Anree', style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface, fontSize: 14)),
-                    const Text('UX Designer', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text(
+                      'Thomas Anree',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const Text(
+                      'UX Designer',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
                   ],
                 ),
               const SizedBox(width: 12),
               PopupMenuButton<String>(
                 onSelected: (val) {
                   if (val == 'logout') {
-                    context.read<AuthCubit>().logout();
+                    context.read<AuthBloc>().add(const AuthLogoutRequested());
                   }
                 },
                 offset: const Offset(0, 48),
@@ -513,14 +658,20 @@ class _Navbar extends StatelessWidget {
                   ),
                 ],
                 child: const CircleAvatar(
-                  backgroundImage: NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256'),
+                  backgroundImage: NetworkImage(
+                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256',
+                  ),
                   radius: 20,
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.keyboard_arrow_down, color: theme.colorScheme.onSurfaceVariant, size: 20),
+              Icon(
+                Icons.keyboard_arrow_down,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: 20,
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -534,5 +685,11 @@ class _NavigationItem {
   final bool hasSubmenu;
   final String? badge;
 
-  _NavigationItem(this.label, this.icon, this.selectedIcon, {this.hasSubmenu = false, this.badge});
+  _NavigationItem(
+    this.label,
+    this.icon,
+    this.selectedIcon, {
+    this.hasSubmenu = false,
+    this.badge,
+  });
 }
