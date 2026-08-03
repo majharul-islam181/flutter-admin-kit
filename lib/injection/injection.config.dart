@@ -20,6 +20,11 @@ import '../core/router/app_router.dart' as _i877;
 import '../core/services/local_storage_service.dart' as _i1003;
 import '../core/theme/theme_cubit.dart' as _i596;
 import '../features/authentication/presentation/bloc/auth_cubit.dart' as _i970;
+import '../features/dashboard/data/repositories/dashboard_repository_impl.dart'
+    as _i650;
+import '../features/dashboard/domain/repositories/dashboard_repository.dart'
+    as _i602;
+import '../features/dashboard/presentation/bloc/dashboard_bloc.dart' as _i356;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -39,11 +44,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1003.LocalStorageService>(
       () => _i1003.LocalStorageService(gh<_i460.SharedPreferences>()),
     );
-    gh.lazySingleton<_i970.AuthCubit>(
-      () => _i970.AuthCubit(gh<_i1003.LocalStorageService>()),
+    gh.lazySingleton<_i602.DashboardRepository>(
+      () => _i650.DashboardRepositoryImpl(),
     );
     gh.lazySingleton<_i596.ThemeCubit>(
       () => _i596.ThemeCubit(gh<_i1003.LocalStorageService>()),
+    );
+    gh.lazySingleton<_i970.AuthCubit>(
+      () => _i970.AuthCubit(gh<_i1003.LocalStorageService>()),
+    );
+    gh.factory<_i356.DashboardBloc>(
+      () => _i356.DashboardBloc(gh<_i602.DashboardRepository>()),
     );
     gh.lazySingleton<_i393.DioClient>(
       () => _i393.DioClient(

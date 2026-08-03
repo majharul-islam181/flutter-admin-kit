@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_cubit.dart';
 import 'package:flutter_admin_kit/core/theme/theme_cubit.dart';
+import 'package:flutter_admin_kit/core/theme/app_colors.dart';
+
 class AdminLayout extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
@@ -32,6 +34,7 @@ class _AdminLayoutState extends State<AdminLayout> {
       key: scaffoldKey,
       drawer: (isMobile || isTablet)
           ? Drawer(
+              backgroundColor: AppColors.tailAdminSidebar,
               child: _SidebarContent(
                 navigationShell: widget.navigationShell,
                 isCollapsed: false,
@@ -46,6 +49,7 @@ class _AdminLayoutState extends State<AdminLayout> {
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: _isSidebarCollapsed ? 80 : 260,
+              color: AppColors.tailAdminSidebar,
               child: _SidebarContent(
                 navigationShell: widget.navigationShell,
                 isCollapsed: _isSidebarCollapsed,
@@ -75,7 +79,7 @@ class _AdminLayoutState extends State<AdminLayout> {
                 // Nested view content
                 Expanded(
                   child: Container(
-                    color: theme.scaffoldBackgroundColor,
+                    color: theme.brightness == Brightness.light ? const Color(0xFFF1F5F9) : theme.scaffoldBackgroundColor,
                     child: widget.navigationShell,
                   ),
                 ),
@@ -101,53 +105,56 @@ class _SidebarContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final activeIndex = navigationShell.currentIndex;
 
     final items = [
-      _NavigationItem('Dashboard', Icons.dashboard_outlined, Icons.dashboard),
-      _NavigationItem('Users', Icons.people_outline, Icons.people),
-      _NavigationItem('Products', Icons.shopping_bag_outlined, Icons.shopping_bag),
-      _NavigationItem('Orders', Icons.receipt_long_outlined, Icons.receipt_long),
-      _NavigationItem('Analytics', Icons.bar_chart_outlined, Icons.bar_chart),
-      _NavigationItem('Settings', Icons.settings_outlined, Icons.settings),
+      _NavigationItem('Dashboard', Icons.dashboard_outlined, Icons.dashboard, hasSubmenu: true),
+      _NavigationItem('Calendar', Icons.calendar_today_outlined, Icons.calendar_today),
+      _NavigationItem('Profile', Icons.person_outline, Icons.person),
+      _NavigationItem('Task', Icons.task_outlined, Icons.task, hasSubmenu: true),
+      _NavigationItem('Forms', Icons.edit_note_outlined, Icons.edit_note, hasSubmenu: true),
+      _NavigationItem('Tables', Icons.table_chart_outlined, Icons.table_chart),
+      _NavigationItem('Pages', Icons.pages_outlined, Icons.pages, hasSubmenu: true),
+    ];
+    
+    final supportItems = [
+      _NavigationItem('Messages', Icons.mail_outline, Icons.mail, badge: '5'),
+      _NavigationItem('Inbox', Icons.inbox_outlined, Icons.inbox),
+      _NavigationItem('Invoice', Icons.receipt_outlined, Icons.receipt),
     ];
 
     return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          right: BorderSide(color: theme.colorScheme.outline),
-        ),
-      ),
+      color: AppColors.tailAdminSidebar,
       child: Column(
         children: [
           // Logo / Header area
           Container(
-            height: 70,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 80,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             alignment: Alignment.centerLeft,
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: theme.colorScheme.outline),
-              ),
-            ),
             child: Row(
               mainAxisAlignment: isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.admin_panel_settings_rounded,
-                  color: theme.colorScheme.primary,
-                  size: 32,
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.tailAdminPrimary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.bar_chart,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
                 if (!isCollapsed) ...[
                   const SizedBox(width: 12),
-                  Text(
-                    'AdminKit',
-                    style: theme.textTheme.titleLarge?.copyWith(
+                  const Text(
+                    'TailAdmin',
+                    style: TextStyle(
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                      color: theme.colorScheme.onSurface,
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -157,97 +164,176 @@ class _SidebarContent extends StatelessWidget {
 
           // Menu list
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                final isSelected = activeIndex == index;
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: InkWell(
-                    onTap: () {
-                      navigationShell.goBranch(index);
-                      if (onSelect != null) onSelect!();
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      height: 48,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: isSelected ? theme.colorScheme.primaryContainer : Colors.transparent,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
-                        children: [
-                          Icon(
-                            isSelected ? item.selectedIcon : item.icon,
-                            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                            size: 22,
-                          ),
-                          if (!isCollapsed) ...[
-                            const SizedBox(width: 12),
-                            Text(
-                              item.label,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              children: [
+                if (!isCollapsed)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 8, bottom: 16),
+                    child: Text(
+                      'MENU',
+                      style: TextStyle(color: Color(0xFF8A99AF), fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ),
-                );
-              },
+                ...items.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final item = entry.value;
+                  // Map the index to our actual routes if possible. Let's just use index 0 for Dashboard.
+                  final actualBranchIndex = index < 6 ? index : 0;
+                  final isSelected = activeIndex == actualBranchIndex;
+                  
+                  if (item.label == 'Dashboard') {
+                     return _buildSubMenu(context, item, isSelected, actualBranchIndex, ['eCommerce', 'Analytics', 'Marketing', 'CRM']);
+                  }
+
+                  return _buildMenuItem(context, item, isSelected, () {
+                    navigationShell.goBranch(actualBranchIndex);
+                    if (onSelect != null) onSelect!();
+                  });
+                }),
+                
+                const SizedBox(height: 24),
+                
+                if (!isCollapsed)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 8, bottom: 16),
+                    child: Text(
+                      'SUPPORT',
+                      style: TextStyle(color: Color(0xFF8A99AF), fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  
+                 ...supportItems.map((item) {
+                   return _buildMenuItem(context, item, false, () {}, isPro: true);
+                 }),
+              ],
             ),
           ),
-
-          // Footer / User Profile shortcut
-          if (!isCollapsed)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: theme.colorScheme.outline),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    backgroundImage: NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256'),
-                    radius: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Jane Doe',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'Super Admin',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
         ],
+      ),
+    );
+  }
+  
+  Widget _buildSubMenu(BuildContext context, _NavigationItem item, bool isSelected, int branchIndex, List<String> subItems) {
+    if (isCollapsed) return _buildMenuItem(context, item, isSelected, () {
+        navigationShell.goBranch(branchIndex);
+        if (onSelect != null) onSelect!();
+    });
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          onTap: () {
+             navigationShell.goBranch(branchIndex);
+             if (onSelect != null) onSelect!();
+          },
+          borderRadius: BorderRadius.circular(4),
+          child: Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFF333A48) : Colors.transparent, // tailAdminSidebarHover
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              children: [
+                Icon(item.icon, color: Colors.white, size: 20),
+                const SizedBox(width: 12),
+                Text(item.label, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500)),
+                const Spacer(),
+                const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 20),
+              ],
+            ),
+          ),
+        ),
+        if (isSelected)
+          Padding(
+            padding: const EdgeInsets.only(left: 36, top: 8, bottom: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: subItems.map((subItem) {
+                final isSubSelected = subItem == 'eCommerce';
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    children: [
+                      Text(
+                        subItem,
+                        style: TextStyle(
+                          color: isSubSelected ? Colors.white : const Color(0xFF8A99AF),
+                          fontSize: 15,
+                        ),
+                      ),
+                      if (subItem != 'eCommerce') ...[
+                         const Spacer(),
+                         Container(
+                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                           decoration: BoxDecoration(color: AppColors.tailAdminPrimary, borderRadius: BorderRadius.circular(12)),
+                           child: const Text('Pro', style: TextStyle(color: Colors.white, fontSize: 10)),
+                         ),
+                         const SizedBox(width: 12),
+                      ]
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildMenuItem(BuildContext context, _NavigationItem item, bool isSelected, VoidCallback onTap, {bool isPro = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF333A48) : Colors.transparent,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Row(
+            mainAxisAlignment: isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.start,
+            children: [
+              Icon(
+                item.icon,
+                color: isSelected ? Colors.white : const Color(0xFF8A99AF),
+                size: 20,
+              ),
+              if (!isCollapsed) ...[
+                const SizedBox(width: 12),
+                Text(
+                  item.label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : const Color(0xFF8A99AF),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(),
+                if (item.badge != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(color: AppColors.tailAdminPrimary, borderRadius: BorderRadius.circular(12)),
+                    child: Text(item.badge!, style: const TextStyle(color: Colors.white, fontSize: 10)),
+                  ),
+                if (isPro)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(color: AppColors.tailAdminPrimary, borderRadius: BorderRadius.circular(12)),
+                    child: const Text('Pro', style: TextStyle(color: Colors.white, fontSize: 10)),
+                  ),
+                if (item.hasSubmenu)
+                   const Icon(Icons.keyboard_arrow_right, color: Color(0xFF8A99AF), size: 20),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -271,14 +357,18 @@ class _Navbar extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      height: 70,
+      height: 80,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(color: theme.colorScheme.outline),
-        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 1),
+            blurRadius: 4,
+          ),
+        ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
           // Sidebar menu trigger
@@ -287,71 +377,150 @@ class _Navbar extends StatelessWidget {
               (isMobile || isTablet)
                   ? Icons.menu
                   : (isSidebarCollapsed ? Icons.menu_open : Icons.menu),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             onPressed: onToggleSidebar,
           ),
-          const SizedBox(width: 8),
-
-          // Title / Dynamic text based on current route
-          Text(
-            'Admin Dashboard',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Spacer(),
-
-          // Actions: Notification, Theme Toggle, Profile
-          IconButton(
-            icon: const Icon(Icons.notifications_none_outlined),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: Icon(
-              theme.brightness == Brightness.dark
-                  ? Icons.light_mode_outlined
-                  : Icons.dark_mode_outlined,
-            ),
-            onPressed: () {
-              context.read<ThemeCubit>().toggleTheme(context);
-            },
-          ),
-          const SizedBox(width: 8),
-          PopupMenuButton<String>(
-            onSelected: (val) {
-              if (val == 'logout') {
-                context.read<AuthCubit>().logout();
-              }
-            },
-            offset: const Offset(0, 48),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'profile',
-                child: Row(
-                  children: [
-                    Icon(Icons.person_outline, size: 20),
-                    SizedBox(width: 8),
-                    Text('My Profile'),
-                  ],
-                ),
+          const SizedBox(width: 16),
+          
+          // Search bar
+          if (!isMobile)
+            Expanded(
+              child: Row(
+                children: [
+                  Icon(Icons.search, color: theme.colorScheme.onSurfaceVariant, size: 20),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Type to search...',
+                    style: TextStyle(color: Colors.grey, fontSize: 15),
+                  ),
+                ],
               ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, size: 20, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Logout', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
+            ),
+          if (isMobile) const Spacer(),
+          
+          // Actions
+          // Theme Toggle Switch
+          Container(
+             width: 50,
+             height: 26,
+             decoration: BoxDecoration(
+               color: const Color(0xFFE2E8F0),
+               borderRadius: BorderRadius.circular(20),
+             ),
+             child: Stack(
+               children: [
+                 Align(
+                   alignment: theme.brightness == Brightness.light ? Alignment.centerLeft : Alignment.centerRight,
+                   child: GestureDetector(
+                     onTap: () => context.read<ThemeCubit>().toggleTheme(context),
+                     child: Container(
+                       width: 22,
+                       height: 22,
+                       margin: const EdgeInsets.all(2),
+                       decoration: const BoxDecoration(
+                         color: Colors.white,
+                         shape: BoxShape.circle,
+                         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 2)],
+                       ),
+                       child: Icon(
+                         theme.brightness == Brightness.light ? Icons.light_mode : Icons.dark_mode,
+                         size: 14,
+                         color: theme.colorScheme.onSurface,
+                       ),
+                     ),
+                   ),
+                 ),
+               ],
+             ),
+          ),
+          
+          const SizedBox(width: 16),
+          // Notification Bell
+          Stack(
+            children: [
+               Container(
+                 padding: const EdgeInsets.all(8),
+                 decoration: BoxDecoration(
+                   shape: BoxShape.circle,
+                   color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                 ),
+                 child: Icon(Icons.notifications_none_outlined, size: 20, color: theme.colorScheme.onSurfaceVariant),
+               ),
+               Positioned(
+                 top: 6,
+                 right: 8,
+                 child: Container(
+                   width: 6,
+                   height: 6,
+                   decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                 ),
+               )
             ],
-            child: const CircleAvatar(
-              backgroundImage: NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256'),
-              radius: 18,
-            ),
           ),
+          const SizedBox(width: 12),
+          // Message Chat
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+            ),
+            child: Icon(Icons.chat_bubble_outline, size: 20, color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(width: 24),
+          
+          // Profile
+          Row(
+            children: [
+              if (!isMobile)
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('Thomas Anree', style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface, fontSize: 14)),
+                    const Text('UX Designer', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  ],
+                ),
+              const SizedBox(width: 12),
+              PopupMenuButton<String>(
+                onSelected: (val) {
+                  if (val == 'logout') {
+                    context.read<AuthCubit>().logout();
+                  }
+                },
+                offset: const Offset(0, 48),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'profile',
+                    child: Row(
+                      children: [
+                        Icon(Icons.person_outline, size: 20),
+                        SizedBox(width: 8),
+                        Text('My Profile'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, size: 20, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Logout', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
+                child: const CircleAvatar(
+                  backgroundImage: NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256'),
+                  radius: 20,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.keyboard_arrow_down, color: theme.colorScheme.onSurfaceVariant, size: 20),
+            ],
+          )
         ],
       ),
     );
@@ -362,6 +531,8 @@ class _NavigationItem {
   final String label;
   final IconData icon;
   final IconData selectedIcon;
+  final bool hasSubmenu;
+  final String? badge;
 
-  _NavigationItem(this.label, this.icon, this.selectedIcon);
+  _NavigationItem(this.label, this.icon, this.selectedIcon, {this.hasSubmenu = false, this.badge});
 }
