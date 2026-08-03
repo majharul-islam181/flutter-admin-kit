@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_admin_kit/features/authentication/presentation/bloc/auth_cubit.dart';
-
+import 'package:flutter_admin_kit/core/theme/theme_cubit.dart';
 class AdminLayout extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
@@ -314,8 +314,7 @@ class _Navbar extends StatelessWidget {
                   : Icons.dark_mode_outlined,
             ),
             onPressed: () {
-              // Wait, theme toggling logic will be integrated via Theme Bloc/Cubit in Phase 4.
-              // For now, it is a visual stub.
+              context.read<ThemeCubit>().toggleTheme(context);
             },
           ),
           const SizedBox(width: 8),

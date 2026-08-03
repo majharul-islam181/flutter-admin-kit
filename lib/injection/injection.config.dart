@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import '../core/network/dio_client.dart' as _i393;
 import '../core/router/app_router.dart' as _i877;
 import '../core/services/local_storage_service.dart' as _i1003;
+import '../core/theme/theme_cubit.dart' as _i596;
 import '../features/authentication/presentation/bloc/auth_cubit.dart' as _i970;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -40,6 +41,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i970.AuthCubit>(
       () => _i970.AuthCubit(gh<_i1003.LocalStorageService>()),
+    );
+    gh.lazySingleton<_i596.ThemeCubit>(
+      () => _i596.ThemeCubit(gh<_i1003.LocalStorageService>()),
     );
     gh.lazySingleton<_i393.DioClient>(
       () => _i393.DioClient(
